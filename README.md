@@ -24,3 +24,12 @@ cabal: The pkg-config package 'gnome-keyring-1' is required but it could not
 be found.
 
 $ sudo apt-get install libgnome-keyring-dev
+
+TODO:
+<merijn> DanC_: Look into ExceptT
+<merijn> From transformers
+<DanC_> whimper. no examples. http://hackage.haskell.org/package/transformers-0.4.1.0/docs/Control-Monad-Trans-Except.html
+
+intellij lost its marbles when I tried to rename a module
+
+intellij takes 8 seconds to compile this little bit of code. `cabal build` is more like 3 seconds.
