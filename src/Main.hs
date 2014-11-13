@@ -1,4 +1,8 @@
 module Main where
 
+import qualified Gnome.Keyring as GK
+
 main :: IO ()
-main = print "hi"
+main = do
+  ok <- GK.available
+  print ok
