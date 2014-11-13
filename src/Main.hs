@@ -11,7 +11,7 @@ import DBAccess ( cliAccess, dbJob )
 
 main :: IO ()
 main = do
-    maybeAccess <- cliAccess getArgs GK.findNetworkPassword DB.connect
+    maybeAccess <- cliAccess getArgs GK.sync DB.connect
     result <- case maybeAccess of
         Right conn -> do
             ans <- dbJob conn

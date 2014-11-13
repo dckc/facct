@@ -1,13 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE Safe #-}
+
 module DBAccess ( cliAccess, dbJob ) where
 
-import Gnome.Keyring (Network, NetworkPassword, Operation, KeyringError,
-                        sync,
-                        network, networkUser, networkProtocol, networkServer, networkObject,
-                        networkPasswordNetwork, networkPasswordSecret)
-import Database.MySQL.Simple (Connection, ConnectInfo, Only(..),
-                                defaultConnectInfo, connectUser, connectPassword, connectDatabase,
-                                query_)
+import Tamed.Keyring (
+    Network, NetworkPassword, Operation, KeyringError,
+    findNetworkPassword,
+    network, networkUser, networkProtocol, networkServer, networkObject,
+    networkPasswordNetwork, networkPasswordSecret)
+import Tamed.MySQL (
+    Connection, ConnectInfo, Only(..),
+    defaultConnectInfo, connectUser, connectPassword, connectDatabase,
+    query_)
 
 
 dbJob :: Connection -> IO Int
@@ -23,10 +27,10 @@ data Problem = Usage String
 
 -- Connect to the DB indicated by CLI args with credentials from Gnome Keyring
 cliAccess :: (IO [String]) -- access to CLI args
-    -> (Network -> Operation [NetworkPassword]) -- lookup access to gnome keyring
-    -> (ConnectInfo -> IO Connection)
+    -> (Operation [NetworkPassword] -> IO (Either KeyringError [NetworkPassword])) -- access to gnome keyring
+    -> (ConnectInfo -> IO Connection) -- access to DB
     -> IO (Either Problem Connection)
-cliAccess getArgs find connect = do
+cliAccess getArgs sync connect = do
     args <- getArgs
     info <- findCreds $ cli args
     conn <- dbAccess info
@@ -36,7 +40,7 @@ cliAccess getArgs find connect = do
 
     findCreds :: (Either Problem String) -> IO (Either Problem ConnectInfo)
     findCreds (Right dbname) = do
-        answers <- sync $ find $ dbloc dbname
+        answers <- sync $ findNetworkPassword $ dbloc dbname
         return $ check answers
         where
 
